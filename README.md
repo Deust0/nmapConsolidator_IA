@@ -204,4 +204,4 @@ Las contribuciones son bienvenidas. Por favor:
 ---
 
 **Versión**: 10.0  
-**Última actualización**: 2024
+**Última actualización**: 2026
