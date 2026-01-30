@@ -1,0 +1,149 @@
+# Requisitos de Herramientas para Escaneo de Servicios
+# Este archivo lista las herramientas necesarias para escaneos específicos por servicio
+# Instalación recomendada en Kali Linux o sistemas similares
+
+# ============================================
+# HERRAMIENTAS DE KALI LINUX (apt-get)
+# ============================================
+
+# HTTP/HTTPS
+# whatweb - Identificación de tecnologías web
+# wpscan - Escaneo de WordPress
+# nikto - Escáner de vulnerabilidades web
+# dirb - Escáner de directorios web
+# gobuster - Escáner de directorios y archivos
+# sqlmap - Detección y explotación de vulnerabilidades SQL
+# Instalación:
+#   sudo apt-get update
+#   sudo apt-get install whatweb wpscan nikto dirb gobuster sqlmap
+
+# SSL/TLS
+# testssl.sh - Análisis SSL/TLS
+# sslscan - Escáner SSL
+# sslyze - Análisis SSL/TLS
+# Instalación:
+#   sudo apt-get install testssl.sh sslscan sslyze
+#   O desde GitHub: git clone https://github.com/drwetter/testssl.sh.git
+
+# FTP
+# ftp - Cliente FTP estándar
+# hydra - Fuerza bruta FTP
+# Instalación:
+#   sudo apt-get install ftp hydra
+
+# SSH
+# ssh-audit - Auditoría SSH
+# Instalación:
+#   sudo apt-get install ssh-audit
+#   O desde GitHub: git clone https://github.com/jtesta/ssh-audit.git
+
+# SMB
+# enum4linux - Enumeración SMB
+# smbclient - Cliente SMB
+# smbmap - Mapeo de recursos SMB
+# Instalación:
+#   sudo apt-get install enum4linux smbclient smbmap
+
+# MySQL
+# mysql - Cliente MySQL
+# Instalación:
+#   sudo apt-get install mysql-client
+
+# PostgreSQL
+# psql - Cliente PostgreSQL
+# Instalación:
+#   sudo apt-get install postgresql-client
+
+# MongoDB
+# mongo - Cliente MongoDB (versiones antiguas)
+# mongosh - Cliente MongoDB (versiones nuevas)
+# Instalación:
+#   sudo apt-get install mongodb-clients
+#   O desde: https://www.mongodb.com/try/download/shell
+
+# Redis
+# redis-cli - Cliente Redis
+# Instalación:
+#   sudo apt-get install redis-tools
+
+# DNS
+# dnsrecon - Reconocimiento DNS
+# dnsenum - Enumeración DNS
+# Instalación:
+#   sudo apt-get install dnsrecon dnsenum
+
+# SMTP
+# smtp-user-enum - Enumeración de usuarios SMTP
+# Instalación:
+#   sudo apt-get install smtp-user-enum
+
+# SNMP
+# snmpwalk - Herramienta SNMP
+# snmp-check - Verificación SNMP
+# Instalación:
+#   sudo apt-get install snmp snmpcheck
+
+# LDAP
+# ldapsearch - Búsqueda LDAP
+# Instalación:
+#   sudo apt-get install ldap-utils
+
+# ============================================
+# HERRAMIENTAS DE GITHUB (Instalación manual)
+# ============================================
+
+# HTTP/HTTPS
+# Nuclei - Escáner de vulnerabilidades rápido
+#   git clone https://github.com/projectdiscovery/nuclei.git
+#   cd nuclei/v2/cmd/nuclei
+#   go build
+#   sudo mv nuclei /usr/local/bin/
+
+# HTTP/HTTPS
+# httpx - Cliente HTTP rápido
+#   go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+
+# HTTP/HTTPS
+# feroxbuster - Escáner de directorios rápido
+#   cargo install feroxbuster
+#   O desde: https://github.com/epi052/feroxbuster/releases
+
+# SSL/TLS
+# testssl.sh (si no está en repos)
+#   git clone --depth 1 https://github.com/drwetter/testssl.sh.git
+#   cd testssl.sh
+#   chmod +x testssl.sh
+#   sudo ln -s $(pwd)/testssl.sh /usr/local/bin/
+
+# SMB
+# crackmapexec - Herramienta todo-en-uno para Windows/SMB
+#   pip3 install crackmapexec
+#   O desde: https://github.com/byt3bl33d3r/CrackMapExec
+
+# MySQL
+# mysql-audit - Auditoría MySQL
+#   git clone https://github.com/meh/ruby-mysql-audit.git
+
+# MongoDB
+# mongoaudit - Auditoría MongoDB
+#   git clone https://github.com/stampery/mongoaudit.git
+#   cd mongoaudit
+#   pip3 install -r requirements.txt
+
+# Redis
+# redis-rogue-server - Explotación Redis
+#   git clone https://github.com/n0b0dyCN/redis-rogue-server.git
+
+# ============================================
+# INSTALACIÓN RÁPIDA (Kali Linux)
+# ============================================
+# Ejecutar en una sola línea:
+# sudo apt-get update && sudo apt-get install -y whatweb wpscan nikto dirb gobuster sqlmap testssl.sh sslscan sslyze hydra ssh-audit enum4linux smbclient smbmap mysql-client postgresql-client mongodb-clients redis-tools dnsrecon dnsenum smtp-user-enum snmp snmpcheck ldap-utils
+
+# ============================================
+# NOTAS
+# ============================================
+# - Algunas herramientas requieren Go, Rust o Python3
+# - Verificar permisos de ejecución después de instalar desde GitHub
+# - Algunas herramientas pueden requerir configuración adicional
+# - Para herramientas de GitHub, verificar README.md de cada repositorio
