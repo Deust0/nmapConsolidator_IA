@@ -47,10 +47,11 @@ def crear_hoja_resultados(wb, resultados):
     ws.title = "Resultados Consolidados"
     
     # Columnas reorganizadas: Estado Auditoría al lado de Severidad, eliminadas OS Type, Método, Confianza, Scripts
+    # Agregadas columnas de CVSS 3.1
     encabezados = [
         "ID", "Archivo Origen", "IP", "Hostnames/Dominios", "Puerto", "Protocolo", "Estado Puerto",
         "Servicio", "Versión", "Vulnerabilidades Detectadas", "Severidad", "Estado Auditoría",
-        "CVSS Score", "Riesgo Calculado", "Resumen", "Impacto", "Recomendación",
+        "AV", "AC", "PR", "UI", "S", "C", "I", "A", "CVSS 3.1", "Riesgo Calculado", "Resumen", "Impacto", "Recomendación",
         "Observaciones", "Fecha Detección", "CPEs"
     ]
     
@@ -69,10 +70,32 @@ def crear_hoja_resultados(wb, resultados):
     dv_estado.errorTitle = "Entrada inválida"
     ws.add_data_validation(dv_estado)
     
+    # Data Validation para componentes CVSS
+    dv_av = DataValidation(type="list", formula1='"Network,Adjacent,Local,Physical"', allow_blank=True)
+    dv_ac = DataValidation(type="list", formula1='"Low,High"', allow_blank=True)
+    dv_pr = DataValidation(type="list", formula1='"None,Low,High"', allow_blank=True)
+    dv_ui = DataValidation(type="list", formula1='"None,Required"', allow_blank=True)
+    dv_s = DataValidation(type="list", formula1='"Unchanged,Changed"', allow_blank=True)
+    dv_cia = DataValidation(type="list", formula1='"None,Low,High"', allow_blank=True)
+    
+    ws.add_data_validation(dv_av)
+    ws.add_data_validation(dv_ac)
+    ws.add_data_validation(dv_pr)
+    ws.add_data_validation(dv_ui)
+    ws.add_data_validation(dv_s)
+    ws.add_data_validation(dv_cia)
+    
     for idx, row_data in enumerate(resultados, 2):
-        # Referencias de columnas actualizadas:
-        # Severidad: K (11), Estado Auditoría: L (12), CVSS: M (13), Riesgo: N (14)
-        # Formula Riesgo: Severidad (K) * CVSS (M)
+        # Referencias de columnas:
+        # K: Severidad, L: Estado Auditoría
+        # M: AV, N: AC, O: PR, P: UI, Q: S, R: C, S: I, T: A
+        # U: CVSS 3.1 (calculado), V: Riesgo Calculado
+        # W: Resumen, X: Impacto, Y: Recomendación, Z: Observaciones
+        # AA: Fecha Detección, AB: CPEs
+        
+        # Fórmula CVSS 3.1 simplificada (requiere implementación completa en producción)
+        # Si Severidad es "Revisado - No vulnerable" o contiene "Falso Positivo", CVSS = 0
+        cvss_formula = f'=IF(OR(K{idx}="Revisado - No vulnerable",K{idx}="Falso Positivo"),0,IF(AND(M{idx}<>"",N{idx}<>"",O{idx}<>"",P{idx}<>"",Q{idx}<>"",R{idx}<>"",S{idx}<>"",T{idx}<>""),ROUND((IF(M{idx}="Network",0.85,IF(M{idx}="Adjacent",0.62,IF(M{idx}="Local",0.55,0.2)))*IF(N{idx}="Low",0.77,0.44)*IF(O{idx}="None",0.85,IF(O{idx}="Low",IF(Q{idx}="Unchanged",0.62,0.68),IF(Q{idx}="Unchanged",0.27,0.5)))*IF(P{idx}="None",0.85,0.62)+IF(R{idx}="High",0.56,IF(R{idx}="Low",0.22,0))*IF(S{idx}="High",0.56,IF(S{idx}="Low",0.22,0))*IF(T{idx}="High",0.56,IF(T{idx}="Low",0.22,0)))*10,1),""))'
         
         row = [
             idx - 1,
@@ -86,20 +109,37 @@ def crear_hoja_resultados(wb, resultados):
             row_data.get("version", ""),
             "",  # Vulnerabilidades Detectadas (J)
             "Pendiente",  # Severidad (K)
-            "Pendiente",  # Estado Auditoría (L) - ahora al lado de Severidad
-            "",  # CVSS Score (M)
-            f"=IF(M{idx}=\"\";\"\";M{idx}*IF(K{idx}=\"Crítica\";4;IF(K{idx}=\"Alta\";3;IF(K{idx}=\"Media\";2;IF(K{idx}=\"Baja\";1;0)))))",  # Riesgo Calculado (N)
-            "",  # Resumen (O)
-            "",  # Impacto (P)
-            "",  # Recomendación (Q)
-            "",  # Observaciones (R)
-            datetime.now().strftime("%Y-%m-%d"),  # Fecha Detección (S)
-            row_data.get("cpes", "")  # CPEs (T)
+            "Pendiente",  # Estado Auditoría (L)
+            "",  # AV - Attack Vector (M)
+            "",  # AC - Attack Complexity (N)
+            "",  # PR - Privileges Required (O)
+            "",  # UI - User Interaction (P)
+            "",  # S - Scope (Q)
+            "",  # C - Confidentiality (R)
+            "",  # I - Integrity (S)
+            "",  # A - Availability (T)
+            cvss_formula,  # CVSS 3.1 (U) - calculado
+            f"=IF(U{idx}=0,0,IF(U{idx}=\"\",\"\",U{idx}*IF(K{idx}=\"Crítica\",4,IF(K{idx}=\"Alta\",3,IF(K{idx}=\"Media\",2,IF(K{idx}=\"Baja\",1,0)))))",  # Riesgo Calculado (V)
+            "",  # Resumen (W)
+            "",  # Impacto (X)
+            "",  # Recomendación (Y)
+            "",  # Observaciones (Z)
+            datetime.now().strftime("%Y-%m-%d"),  # Fecha Detección (AA)
+            row_data.get("cpes", "")  # CPEs (AB)
         ]
         ws.append(row)
         
+        # Aplicar validaciones
         dv_severidad.add(f"K{idx}")
         dv_estado.add(f"L{idx}")
+        dv_av.add(f"M{idx}")
+        dv_ac.add(f"N{idx}")
+        dv_pr.add(f"O{idx}")
+        dv_ui.add(f"P{idx}")
+        dv_s.add(f"Q{idx}")
+        dv_cia.add(f"R{idx}")  # Confidentiality
+        dv_cia.add(f"S{idx}")  # Integrity
+        dv_cia.add(f"T{idx}")  # Availability
         
         severidad_celda = ws[f"K{idx}"]
         severidad_celda.fill = PatternFill(start_color=COLORES_SEVERIDAD["Pendiente"], 
@@ -111,9 +151,9 @@ def crear_hoja_resultados(wb, resultados):
                                        end_color="CCCCCC", 
                                        fill_type="solid")
     
-    # Ajustar anchos de columnas (19 columnas ahora)
-    columnas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
-    anchos = [5, 12, 13, 25, 8, 10, 12, 12, 10, 20, 12, 12, 10, 12, 20, 20, 20, 20, 12, 25]
+    # Ajustar anchos de columnas (28 columnas ahora)
+    columnas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB']
+    anchos = [5, 12, 13, 25, 8, 10, 12, 12, 10, 20, 12, 12, 8, 8, 8, 8, 8, 8, 8, 8, 10, 12, 20, 20, 20, 20, 12, 25]
     
     for col, ancho in zip(columnas, anchos):
         ws.column_dimensions[col].width = ancho
@@ -549,4 +589,84 @@ def crear_hoja_instrucciones(wb):
         ws[f'A{idx}'] = instruccion
     
     ws.column_dimensions['A'].width = 100
+    configurar_impresion(ws)
+
+
+def crear_hoja_vulnerabilidades_ia(wb, vulnerabilidades_ia):
+    """Crea hoja con vulnerabilidades detectadas por IA"""
+    if not vulnerabilidades_ia:
+        return
+    
+    ws = wb.create_sheet(title="Vulnerabilidades IA")
+    
+    encabezados = [
+        "ID", "IP", "Puerto", "Servicio", "Tipo", "Vector Ataque", "Severidad", "CVSS 3.1", 
+        "Criticidad Ajustada", "Descripción", "Recomendación", "Estado"
+    ]
+    
+    ws.append(encabezados)
+    aplicar_formato_encabezado(ws)
+    
+    # Data Validation para Vector de Ataque
+    dv_vector = DataValidation(type="list", formula1='"Internet,Adyacente,Local,Físico"', allow_blank=True)
+    dv_vector.error = "Selecciona: Internet, Adyacente, Local, Físico"
+    dv_vector.errorTitle = "Entrada inválida"
+    ws.add_data_validation(dv_vector)
+    
+    # Data Validation para Severidad
+    dv_severidad = DataValidation(type="list", formula1='"Crítica,Alta,Media,Baja"', allow_blank=True)
+    dv_severidad.error = "Selecciona: Crítica, Alta, Media, Baja"
+    dv_severidad.errorTitle = "Entrada inválida"
+    ws.add_data_validation(dv_severidad)
+    
+    # Data Validation para Estado
+    dv_estado = DataValidation(type="list", formula1='"Pendiente,Verificado,Falso Positivo,Confirmado"', allow_blank=True)
+    dv_estado.error = "Selecciona: Pendiente, Verificado, Falso Positivo, Confirmado"
+    dv_estado.errorTitle = "Entrada inválida"
+    ws.add_data_validation(dv_estado)
+    
+    for vuln in vulnerabilidades_ia:
+        idx = ws.max_row + 1
+        
+        # Fórmula CVSS: Si Estado es "Falso Positivo", CVSS = 0
+        # Si no, calcular basado en Vector de Ataque y Severidad
+        cvss_formula = f'=IF(L{idx}="Falso Positivo",0,IF(AND(F{idx}<>"",G{idx}<>""),IF(F{idx}="Internet",IF(G{idx}="Crítica",9.0,IF(G{idx}="Alta",7.5,IF(G{idx}="Media",5.0,2.5))),IF(F{idx}="Adyacente",IF(G{idx}="Crítica",8.5,IF(G{idx}="Alta",7.0,IF(G{idx}="Media",4.5,2.0))),IF(F{idx}="Local",IF(G{idx}="Crítica",7.5,IF(G{idx}="Alta",6.5,IF(G{idx}="Media",4.0,1.5))),IF(G{idx}="Crítica",6.0,IF(G{idx}="Alta",5.0,IF(G{idx}="Media",3.5,1.0))))))),""))'
+        
+        # Fórmula Criticidad Ajustada: Basada en Vector de Ataque y Severidad
+        criticidad_formula = f'=IF(L{idx}="Falso Positivo","Falso Positivo",IF(AND(F{idx}<>"",G{idx}<>""),IF(F{idx}="Internet",G{idx},IF(F{idx}="Adyacente",IF(G{idx}="Crítica","Crítica",IF(G{idx}="Alta","Alta","Media")),IF(F{idx}="Local",IF(G{idx}="Crítica","Alta",IF(G{idx}="Alta","Media","Baja")),IF(G{idx}="Crítica","Media",IF(G{idx}="Alta","Media","Baja"))))),""))'
+        
+        row = [
+            vuln.get("id", ""),
+            vuln.get("ip", ""),
+            vuln.get("puerto", ""),
+            vuln.get("servicio", ""),
+            vuln.get("tipo", ""),
+            "",  # Vector Ataque (F) - se llena manualmente
+            vuln.get("severidad", "Pendiente"),  # Severidad (G)
+            cvss_formula,  # CVSS 3.1 (H) - calculado
+            criticidad_formula,  # Criticidad Ajustada (I) - calculada
+            vuln.get("descripcion", ""),
+            vuln.get("recomendacion", ""),
+            vuln.get("estado", "Pendiente")
+        ]
+        ws.append(row)
+        
+        idx = ws.max_row
+        dv_vector.add(f"F{idx}")
+        dv_severidad.add(f"G{idx}")
+        dv_estado.add(f"L{idx}")
+        
+        # Aplicar color según severidad
+        severidad = vuln.get("severidad", "Pendiente")
+        color_hex = COLORES_SEVERIDAD.get(severidad, COLORES_SEVERIDAD["Pendiente"])
+        fill = PatternFill(start_color=color_hex, end_color=color_hex, fill_type="solid")
+        ws[f"G{idx}"].fill = fill
+    
+    # Ajustar anchos de columna
+    columnas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+    anchos = [5, 13, 8, 12, 25, 12, 12, 10, 15, 40, 40, 15]
+    
+    for col, ancho in zip(columnas, anchos):
+        ws.column_dimensions[col].width = ancho
+    
     configurar_impresion(ws)

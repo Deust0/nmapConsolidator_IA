@@ -58,7 +58,7 @@ def main_cli():
         os.makedirs(carpeta, exist_ok=True)
         
         archivos_todos = archivos_gnmap + archivos_nmap + archivos_xml
-        guardar_xlsx_completo(resultados, identificador, archivos_todos)
+        guardar_xlsx_completo(resultados, identificador, archivos_todos, vulnerabilidades_ia=None)
         
         carpeta_scripts = os.path.join(carpeta, "nmap_scripts")
         guardar_scripts_ejecutables(resultados, carpeta_scripts)

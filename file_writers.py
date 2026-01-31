@@ -11,7 +11,7 @@ from excel_generator import (
     crear_hoja_resumen_ips, crear_hoja_seguimiento_vulnerabilidades,
     crear_hoja_matriz_riesgos, crear_hoja_analisis_ip,
     crear_hoja_comandos_mejorada, crear_hoja_info_escaneos,
-    crear_hoja_instrucciones, crear_hoja_vulnerabilidades_detectadas
+    crear_hoja_instrucciones, crear_hoja_vulnerabilidades_ia
 )
 from nmap_commands import generar_comandos_ejecutables
 
@@ -45,7 +45,7 @@ def generar_scope_testssl(resultados, identificador, carpeta_base="resultados"):
     return archivo_scope
 
 
-def guardar_xlsx_completo(resultados, identificador, archivos_procesados, carpeta_base="resultados"):
+def guardar_xlsx_completo(resultados, identificador, archivos_procesados, vulnerabilidades_ia=None, carpeta_base="resultados"):
     """Guarda resultados en XLSX con todas las hojas"""
     carpeta = f"{carpeta_base}_{identificador}"
     os.makedirs(carpeta, exist_ok=True)
@@ -54,7 +54,6 @@ def guardar_xlsx_completo(resultados, identificador, archivos_procesados, carpet
     wb = openpyxl.Workbook()
     
     crear_hoja_resultados(wb, resultados)
-    crear_hoja_vulnerabilidades_detectadas(wb, resultados)  # Nueva hoja con análisis IA
     crear_hoja_dashboard_vulnerabilidades(wb, resultados)
     crear_hoja_resumen_ips(wb, resultados)
     crear_hoja_seguimiento_vulnerabilidades(wb, resultados)
@@ -63,6 +62,10 @@ def guardar_xlsx_completo(resultados, identificador, archivos_procesados, carpet
     crear_hoja_comandos_mejorada(wb, resultados)
     crear_hoja_info_escaneos(wb, archivos_procesados)
     crear_hoja_instrucciones(wb)
+    
+    # Agregar hoja de vulnerabilidades IA si existen
+    if vulnerabilidades_ia:
+        crear_hoja_vulnerabilidades_ia(wb, vulnerabilidades_ia)
     
     wb.save(archivo_xlsx)
     print(f"✅ Excel profesional generado: {archivo_xlsx}")
